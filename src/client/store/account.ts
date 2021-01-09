@@ -2,7 +2,6 @@ import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import sha256 from 'crypto-js/sha256'
 
 import { IAccount } from '@/server/models/account'
-import { IJob } from '@/server/models/job'
 
 interface IPayload {
     email: string;
@@ -31,11 +30,18 @@ export default class extends VuexModule {
     }
 
     @Action
+    async register({ email, password }: IPayload) {
+        const hash = sha256(password).toString()
+        const { status } = await axios.post('/api/account', { email, hash })
+        return status
+    }
+
+    @Action
     async login({ email, password }: IPayload) {
         const hash = sha256(password).toString()
         const { status, data } = await axios.post('/api/account/login', { email, hash })
 
-        this.context.commit('setIsLogin', status === 200)
+        this.context.dispatch('getAccountInfo')
 
         return status
     }
