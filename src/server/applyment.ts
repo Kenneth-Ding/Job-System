@@ -30,6 +30,8 @@ const applicantGiveup = (applyment: DApplyment) => {
     applyment.save()
 }
 
+
+
 export const bossConfirm = async(applyment: Types.ObjectId, boss: Types.ObjectId) => {
     const targetApplyment = await Applyment.findById(applyment)
     const targetJob = await Job.findById(targetApplyment?.job)
@@ -85,6 +87,22 @@ export const findDataApplyment = async(job: Types.ObjectId) => {
     else {
         console.log('查詢失敗')
         return 400
+    }
+}
+
+export const findAllApplicant = async(job: Types.ObjectId) => {
+    const targetApplyment = await Applyment.find({job: job})
+    var targetApplicant =new Array();
+    var ApplicantName =new Array();
+    for (let i = 0; i < targetApplyment.length; i++) {
+        targetApplicant.push(await Account.find({_id: targetApplyment[i].applicant}))
+    }
+    for (let i = 0; i < targetApplicant.length; i++) {
+        ApplicantName.push((targetApplicant[i][0].personal.nameZH))
+    }
+    if (targetApplyment) {
+        console.log('查詢成功')
+        return ApplicantName
     }
 }
 
@@ -170,5 +188,6 @@ export const applicantRefuseApplyment = async(applyment: Types.ObjectId) => {
     }
 }
 
-// findDataApplyment(Types.ObjectId('5fde0206359f4c512ce389be'))
-applicantConfirm(Types.ObjectId('5fde0206359f4c512ce389be'), Types.ObjectId('5fd258253ec604545ce35e46'))
+// applicantRefuseApplyment(Types.ObjectId('5fde0206359f4c512ce389ba'))
+// applicantConfirm(Types.ObjectId('5fde0206359f4c512ce389be'), Types.ObjectId('5fd258253ec604545ce35e46'))
+findAllApplicant(Types.ObjectId('5fda3086503d8f1f9c33f97a'))

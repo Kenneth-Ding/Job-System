@@ -20,7 +20,7 @@ v-dialog(fullscreen, :value="value")
                     v-card-actions
                         v-spacer
                         v-btn(color="error") 拒絕
-                        v-btn(color="success") 接受
+                        v-btn(color="success", ) 接受
                         v-btn(color="warning", @click="showResume") 詳細資料
 
         ResumeDialog(v-model="show")
@@ -47,10 +47,11 @@ export default class extends Vue {
     }
 
     mounted() {
-        for (let i = 0; i < 5; i++) {
-            this.candidates.push({
-                name: '何文子'
-            })
+            for (let i = 0; i < 8; i++) {
+                this.candidates.push({
+                    name: '何文子'
+                })
+
         }
     }
 }
