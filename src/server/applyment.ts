@@ -1,4 +1,4 @@
-import { DApplyment, Applyment, Job, Account } from './models'
+import { Applyment, Job } from './models'
 import { sendNots } from '@/server/notification'
 
 import { Types } from 'mongoose'
@@ -45,23 +45,23 @@ export const bossConfirm = async(applyment: Types.ObjectId, boss: Types.ObjectId
 
     // sendNots([publisher], `新的應徵者`, `${applyment.job.title}`)
 
-    return
+    let applyment = await Applyment.create({
+        applicant,
+        job,
+        resume
+    })
+
+    return applyment
 }
 
-export async function find(job?: string, applicant?: string) {
-    let query: any = {
-        job,
-        applicant
-    }
+export async function findByApplicant(applicant: string) {
+    let applyments = await Applyment.find({ applicant }).populateTs('job')
+    return applyments
+}
 
-    for (let [key, val] of Object.entries(query)) {
-        if (val === undefined) {
-            delete query[key]
-        }
-    }
-
-    let docs = await Applyment.find(query)
-    return docs
+export async function findByJob(job: string) {
+    let applyments = await Applyment.find({ job }).populateTs('job')
+    return applyments
 }
 
 export const findAllApplicant = async(job: Types.ObjectId) => {
@@ -143,7 +143,6 @@ export async function confirm(id: string) {
     if (!applyment) {
         return 404
     }
-
 
     // notify(id, '工作申請', `${applyment.job.title}的工作申請已被拒絕 :(`)
 
