@@ -15,52 +15,49 @@ v-card(tile, height="100%")
 
     v-divider
 
-    v-list(v-if="isJobSeeker", subheader)
-        v-list-item(to="/link-ntou")
-            v-list-item-icon
-                v-icon mdi-link-variant
-            v-list-item-content
-                v-list-item-title 連結海大校務系統
+    v-expand-transition
+        div(v-if="isJobSeeker")
+            v-list(subheader)
+                v-list-item(to="/link-ntou")
+                    v-list-item-icon
+                        v-icon mdi-link-variant
+                    v-list-item-content
+                        v-list-item-title 連結海大校務系統
 
-        v-list-item(to="/timetable")
-            v-list-item-icon
-                v-icon mdi-timetable
-            v-list-item-content
-                v-list-item-title 課表
+                v-list-item(to="/timetable")
+                    v-list-item-icon
+                        v-icon mdi-timetable
+                    v-list-item-content
+                        v-list-item-title 課表
+            v-divider
 
-    v-divider
+    div(v-if="isLogin")
+        v-list(subheader)
+            v-list-item(@click="switchUserState")
+                v-list-item-icon
+                    v-icon mdi-swap-horizontal
+                v-list-item-content
+                    v-list-item-title 切換模式
 
-    v-list(v-if="isLogin", subheader)
-        //- v-subheader(inset) 控制
+            v-list-item(to="/resume", v-if="isJobSeeker")
+                v-list-item-icon
+                    v-icon mdi-text-box-outline
+                v-list-item-content
+                    v-list-item-title 履歷範本
+                v-list-item-icon
+                    v-icon mdi-chevron-right
 
-        v-list-item(@click="switchUserState")
-            v-list-item-icon
-                v-icon mdi-swap-horizontal
-            v-list-item-content
-                v-list-item-title 切換模式
-
-        v-list-item(@click="showResumeTemplate = true", v-if="isJobSeeker")
-            v-list-item-icon
-                v-icon mdi-text-box-outline
-            v-list-item-content
-                v-list-item-title 履歷範本
-            v-list-item-icon
-                v-icon mdi-chevron-right
-            ResumeTemplatesDialog(v-model="showResumeTemplate")
-
-        v-list-item(@click="showBlacklist = true")
-            v-list-item-icon
-                v-icon mdi-account-cancel-outline
-            v-list-item-content
-                v-list-item-title 黑名單
-            v-list-item-icon
-                v-icon mdi-chevron-right
-            BlacklistDialog(v-model="showBlacklist")
-
-    v-divider
+            v-list-item(@click="showBlacklist = true")
+                v-list-item-icon
+                    v-icon mdi-account-cancel-outline
+                v-list-item-content
+                    v-list-item-title 黑名單
+                v-list-item-icon
+                    v-icon mdi-chevron-right
+                BlacklistDialog(v-model="showBlacklist")
+        v-divider
 
     v-list(subheader)
-        //- v-subheader(inset) 控制
         v-list-item(v-if="!isLogin", to="/login")
             v-list-item-icon
                 v-icon mdi-login-variant
@@ -95,13 +92,12 @@ v-card(tile, height="100%")
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import BlacklistDialog from '@/client/components/BlacklistDialog.vue'
-import ResumeTemplatesDialog from '@/client/components/ResumeTemplatesDialog.vue'
 import { sendMessage } from '../sysmsg'
 import { IAccount } from '@/server/models'
 
 const Account = namespace('Account')
 
-@Component({ components: { BlacklistDialog, ResumeTemplatesDialog } })
+@Component({ components: { BlacklistDialog } })
 export default class extends Vue {
     @Account.State account!: IAccount
     @Account.State isJobSeeker!: boolean
@@ -110,7 +106,6 @@ export default class extends Vue {
     @Account.Action('switchUserState') _switchUserState!: Function
 
     showBlacklist = false
-    showResumeTemplate = false
 
     logoutDialog = {
         show: false,
@@ -147,7 +142,7 @@ export default class extends Vue {
     }
 
     mounted() {
-        
+
     }
 }
 

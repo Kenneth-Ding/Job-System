@@ -4,18 +4,20 @@ v-combobox(
     chips,
     outlined,
     hide-selected,
+    :loading="loading",
     :filter="filter",
     :hide-no-data="!search",
     :items="items",
     :search-input.sync="search",
     :label="label",
-    :readonly="readOnly",
+    :disabled="readonly",
+    :readonly="readonly",
     v-model="model"
 )
     template(#no-data)
         v-list-item
             span.subheading 新建
-            v-chip.ml-1(color="secondary") {{ search }}
+            v-chip.ml-1(outlined, color="secondary") {{ search }}
 
     template(#selection="{ attrs, item, parent, selected }")
         v-chip(
@@ -26,7 +28,7 @@ v-combobox(
             v-bind="attrs"
         )
             span.pr-2 {{ item.text }}
-            v-icon(small, @click="parent.selectItem(item)") mdi-close
+            v-icon(small, @click="parent.selectItem(item)", v-if="readOnly") mdi-close
 
     template(#item="{ index, item }")
         v-chip(outlined, color="secondary")
@@ -35,6 +37,7 @@ v-combobox(
 
 
 <script lang="ts">
+import { ITag } from '@/server/models'
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 
 @Component
@@ -45,14 +48,17 @@ export default class extends Vue {
     items: any[] = [{ header: '選擇或新建標籤' }]
     search = ''
     model: any[] = []
+    loading = false
+
+    get readonly() {
+        return this.readOnly !== undefined ? this.readOnly : false
+    }
 
     filter(item: any, queryText: string, itemText: string) {
         if (item.header) return false
 
-        const hasValue = (val: any) => val != null ? val : ''
-
-        const text = hasValue(itemText)
-        const query = hasValue(queryText)
+        const text = itemText || ''
+        const query = queryText || ''
 
         return text.toString()
             .toLowerCase()
@@ -65,7 +71,7 @@ export default class extends Vue {
 
         this.model = val.map((v: any) => {
             if (typeof v === 'string') {
-                v = { text: v, create: true }
+                v = { text: v }
                 this.items.push(v)
             }
             return v
@@ -73,17 +79,25 @@ export default class extends Vue {
     }
 
     getData() {
-        let tags = this.model.filter(x => !x.create)
-        let newTags = this.model.filter(x => x.create)
+        return this.model.map(x => x.text)
+    }
 
-        return {
-            tags: tags.map(x => x.text),
-            newTags: newTags.map(x => x.text)
+    setData(tags: string[]) {
+        this.model = tags.map(x => ({ text: x }))
+    }
+
+    async loadTags() {
+        this.loading = true
+        let { status, data } = await axios.get('/api/job/tags')
+        this.loading = false
+
+        if (status == 200) {
+            this.items.push(...data.map((x: any) => ({ text: x.name })))
         }
     }
 
-    setData(tags: any[]) {
-        
+    mounted() {
+        this.loadTags()
     }
 }
 </script>
